@@ -1,0 +1,40 @@
+Space Tracker - założenia projektowe
+
+
+Satelita porusza się w 2-wymiarowym układzie słonecznym. Celem naszego zadania jest takie dobranie parametrów lotu ( czas startu, prędkość oraz kąt nachylenia satelity ), aby satelita znalazł się możliwie blisko planety docelowej.
+
+Założenia dotyczące satelty:
+	na satelitę oddziałują wszystkie planety US
+	satelita nie oddziałuje na planety US
+	satelita rozpoczna swój ruch w danej chwili czasu z pewną prędkością i pod pewnym kątem
+	od startu satelity jedyne siły jakie na niego działają to siły grawitacji planet
+	satelitę reprezentujemy jako pewien punkt w przestrzeni
+	zderzenie satelity z ciałem niebieskim następuje, gdy odległość satelity od środka planety jest mniejsza od jej promienia
+	ruch satelity jest wyliczany iteracyjnie z definiowalnym kwantem czasu
+	na dotarcie w pobliże danej planety satelita ma, ograniczony przez użytkownika programu, czas
+	przerwanie ruchu satelity następuje przez : 
+		dotarcie na wyznaczoną odległość do docelowej planety
+		"zderzenie" z innym ciałem niebieskim
+		przekroczenie przydzielonego czasu
+
+Założenia odnośnie układu słonecznego:
+	każde ciało niebieskie jest reprezentowane za pomocą: promienia orbity, okresu obrotu, promienia ciała, masy, obecnego kąta obrotu
+	w centrum układu znajduje się pojedyncza gwiazda wokół której krążą pozostałe planety
+	planety nie oddziałują na siebie grawitacyjnie
+	planety poruszają się po kołowych orbitach
+	od rozpoczęcia swojego ruchu planety cały czas poruszają się ruchem jednostajnym po tej samej orbicie
+	liczba planet w układzie może być dowolna ( >= 1 aby umożliwić start satelity )
+
+Funkcja celu:
+	wynikiem tej funkcji jest minimalna odległość na jaką udało się zbliżyć satelicie do docelowej planety
+	celem zadania jest zminimalizowanie tej funkcji
+
+Funkcja optymalizująca:
+	do ustalenia
+
+Dodatkowe funkcjonalności programu:
+	aby zobrazować działanie programu użytkwonik może zdefiniować kwanty czasu, w których zostanie narysowany wykres przedstawiający obecne położenie wszystkich elementów układu
+
+Przestrzeń przeszukiwań:
+	trójwymiarowa przestrzeń, której każdy punkt symbolizuje konkretne ustawienia początkowe satelity ( coś na kształt przestrzeni fazowej )
+	znaczenie współrzędnych do ustalenia - wstępnie współrzędne walcowe ( promień określa prędkość, kąt to kąt początkowy satelity, a wysokość oznacza kolejne kwanty czasu )
