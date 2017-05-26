@@ -338,7 +338,7 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 
 
-s, sat = createWorld(best_state)
+s, sat = createWorld( best_state )
 DT = 0.2
 
 fig = plt.figure()
@@ -361,8 +361,9 @@ for p in s.planets:
 		plaGraph = plt.Circle((p.x, p.y), p.r, fc='c', color='black')
 	planetGraphs.append((p, plaGraph))
 
+pgraphs = []
 def init():
-	pgraphs = []
+	global pgraphs
 	for (p, pgraph) in planetGraphs:
 		pgraph.center = (p.x, p.y)
 		ax.add_patch(pgraph)
@@ -373,21 +374,26 @@ def init():
 	ax.add_patch(sunGraph)
 	return pgraphs + [sunGraph, satGraph]
 
-
+stopped = False
 def animate(i):
-	sat.fly(s, DT)
-	pgraphs = []
-	for (p, pgraph) in planetGraphs:
-		pgraph.center = (p.x, p.y)
-		pgraphs.append(pgraph)
-
-	satGraph.center = (sat.x, sat.y)
+	global stopped, pgraphs
+	if i == int(anneal.tmax/DT) - 1:
+		stopped = True
+		
+	if not stopped:
+		sat.fly(s, DT)
+		pgraphs = []
+		for (p, pgraph) in planetGraphs:
+			pgraph.center = (p.x, p.y)
+			pgraphs.append(pgraph)
+	
+		satGraph.center = (sat.x, sat.y)
 
 	return pgraphs + [sunGraph, satGraph]
 
 
-def main(dt, tmax):
-	f = int(tmax/dt)
+def main(tmax):
+	f = int(tmax/DT)
 	anim = animation.FuncAnimation(fig, animate, 
 								   init_func=init, 
 								   frames=f, 
@@ -396,4 +402,5 @@ def main(dt, tmax):
 
 	plt.show()
 
-main(DT, 1)
+main(anneal.tmax)
+
