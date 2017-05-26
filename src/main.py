@@ -105,10 +105,6 @@ class Satelite():
 		(self.t0, self.a0, self.v0) = state
 		self.v0x = self.v0 * math.cos(self.a0)
 		self.v0y = self.v0 * math.sin(self.a0)
-
-		vinx, viny = self.inertiaStart()
-		self.v0x += vinx
-		self.v0y += viny
 		self.inSpace = False
 
 	def inertiaStart(self):
@@ -148,6 +144,15 @@ class Satelite():
 				if planet.collides(self.x, self.y) and (planet != self.startplanet or self.inSpace):
 					self.collided = True
 					return False
+		else:
+			# satelite have to be ready for start
+			if self.t0 - dt <= 0:
+				vinx, viny = self.inertiaStart()
+				self.v0x += vinx
+				self.v0y += viny
+			self.x = self.startplanet.x
+			self.y = self.startplanet.y
+			
 		solarsystem.move(dt)
 		return True
 
@@ -301,6 +306,7 @@ for opt, arg in opts:
 		show_every_step = True
 	elif opt == '-a':
 		show_every_annealing = True
+		
 
 anneal = SimulatedAnnealing()
 best_score = sys.float_info.max
@@ -337,7 +343,7 @@ DT = 0.2
 
 fig = plt.figure()
 fig.set_dpi(100)
-fig.set_size_inches(9, 9)
+fig.set_size_inches(7,7)
 
 RANG = 1e3
 
@@ -347,7 +353,12 @@ satGraph = plt.Circle((sat.x, sat.y), 8, fc='r')
 sunGraph = plt.Circle((0, 0), s.sun.r, fc='yellow', color='black')
 planetGraphs = []
 for p in s.planets:
-	plaGraph = plt.Circle((p.x, p.y), p.r, fc='c', color='black')
+	if p == sat.startplanet:
+		plaGraph = plt.Circle((p.x, p.y), p.r, fc='m', color='red')
+	elif p == sat.destplanet:
+		plaGraph = plt.Circle((p.x, p.y), p.r, fc='m', color='red')
+	else:
+		plaGraph = plt.Circle((p.x, p.y), p.r, fc='c', color='black')
 	planetGraphs.append((p, plaGraph))
 
 def init():
@@ -361,6 +372,7 @@ def init():
 	ax.add_patch(satGraph)
 	ax.add_patch(sunGraph)
 	return pgraphs + [sunGraph, satGraph]
+
 
 def animate(i):
 	sat.fly(s, DT)
