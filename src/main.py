@@ -303,7 +303,7 @@ for opt, arg in opts:
 		show_every_annealing = True
 
 anneal = SimulatedAnnealing()
-best_score = 0xefffffff
+best_score = sys.float_info.max
 best_state = []
 best_steps = 0
 for i in range(algorithm_runs):
