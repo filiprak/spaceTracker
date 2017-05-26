@@ -279,16 +279,17 @@ import sys, getopt
 
 show_chart = False
 algorithm_runs = 1
+show_every_annealing = False
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hvi:r:",["ifile=","show_every_step"])
+	opts, args = getopt.getopt(sys.argv[1:],"hvi:r:a",["ifile=","show_every_step"])
 except getopt.GetoptError:
 	print 'test.py -i <inputfile> -o <outputfile>'
 	sys.exit(2)
 
 for opt, arg in opts:
 	if opt == '-h':
-		print 'main.py [-h] [-r <anneal_tries] [-i <config_file>]'
+		print 'main.py [-ha] [-r <anneal_tries] [-i <config_file>]'
 		sys.exit(2)
 	elif opt in ("-i", "--ifile"):
 		config_file = arg
@@ -298,6 +299,8 @@ for opt, arg in opts:
 		algorithm_runs = int(arg)
 	elif opt == "--show_every_step":
 		show_every_step = True
+	elif opt == '-a':
+		show_every_annealing = True
 
 anneal = SimulatedAnnealing()
 best_score = 0xefffffff
@@ -305,16 +308,18 @@ best_state = []
 best_steps = 0
 for i in range(algorithm_runs):
 	(score, steps, result_state) = anneal.start()
+	if show_every_annealing == True :
+		print "Numer: " + str(i)
+		print "Wynik: " + str(score)
+		print "Ilosc krokow: " + str(steps)
+		print "Stan satelity: " + str(result_state)
 	if score < best_score :
 		best_score = score
 		best_state = result_state
 		best_steps = steps
-print "Najlepszy wynik"
-print best_score
-print "Ilosc krokow: "
-print best_steps
-print "Stan satelity: "
-print best_state
+print "Najlepszy wynik: " + str(best_score)
+print "Ilosc krokow: " + str(best_steps)
+print "Stan satelity: " + str(best_state)
 
 if show_chart == False :
 	sys.exit(0)
