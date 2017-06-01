@@ -45,7 +45,7 @@ class Planet():
 		return math.sqrt(x*x + y*y)
 	
 	def move(self, dt):
-		self.alfa += 2 * math.pi * (dt / self.t)
+		self.alfa += 2 * math.pi * (float(dt) / self.t)
 		if self.alfa > 2 * math.pi:
 			self.alfa -= 2 * math.pi
 		self.x = self.d * math.cos(self.alfa)
@@ -152,7 +152,7 @@ class Satelite():
 				self.v0y += viny
 			self.x = self.startplanet.x
 			self.y = self.startplanet.y
-			
+		
 		solarsystem.move(dt)
 		return True
 
@@ -285,16 +285,18 @@ import sys, getopt
 show_chart = False
 algorithm_runs = 1
 show_every_annealing = False
+only_graph = False
+sat_state = None
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hvi:r:a",["ifile=","show_every_step"])
+	opts, args = getopt.getopt(sys.argv[1:],"hvi:r:ag:",["ifile=","show_every_step"])
 except getopt.GetoptError:
-	print 'test.py -i <inputfile> -o <outputfile>'
+	print 'main.py -i <inputfile> -o <outputfile>'
 	sys.exit(2)
 
 for opt, arg in opts:
 	if opt == '-h':
-		print 'main.py [-ha] [-r <anneal_tries] [-i <config_file>]'
+		print 'main.py [-ha] [-r <anneal_tries] [-i <config_file>] [-v] [-g 0, 0, 0]'
 		sys.exit(2)
 	elif opt in ("-i", "--ifile"):
 		config_file = arg
@@ -306,30 +308,37 @@ for opt, arg in opts:
 		show_every_step = True
 	elif opt == '-a':
 		show_every_annealing = True
+	elif opt == '-g':
+		only_graph = True
+		sat_state = tuple(map(float, arg.split(',')))
+		
 		
 
 anneal = SimulatedAnnealing()
 best_score = sys.float_info.max
 best_state = []
 best_steps = 0
-for i in range(algorithm_runs):
-	(score, steps, result_state) = anneal.start()
-	if show_every_annealing == True :
-		print "Numer: " + str(i)
-		print "Wynik: " + str(score)
-		print "Ilosc krokow: " + str(steps)
-		print "Stan satelity: " + str(result_state)
-	if score < best_score :
-		best_score = score
-		best_state = result_state
-		best_steps = steps
-print "Najlepszy wynik: " + str(best_score)
-print "Ilosc krokow: " + str(best_steps)
-print "Stan satelity: " + str(best_state)
 
-if show_chart == False :
-	sys.exit(0)
-
+if not only_graph:
+	for i in range(algorithm_runs):
+		(score, steps, result_state) = anneal.start()
+		if show_every_annealing == True :
+			print "Numer: " + str(i)
+			print "Wynik: " + str(score)
+			print "Ilosc krokow: " + str(steps)
+			print "Stan satelity: " + str(result_state)
+		if score < best_score :
+			best_score = score
+			best_state = result_state
+			best_steps = steps
+	print "Najlepszy wynik: " + str(best_score)
+	print "Ilosc krokow: " + str(best_steps)
+	print "Stan satelity: " + str(best_state)
+	
+	if show_chart == False :
+		sys.exit(0)
+else:
+	best_state = sat_state
 
 # animation
 import numpy as np
@@ -339,7 +348,7 @@ from matplotlib import animation
 
 
 s, sat = createWorld( best_state )
-DT = 0.2
+DT = anneal.dt
 
 fig = plt.figure()
 fig.set_dpi(100)
@@ -347,7 +356,10 @@ fig.set_size_inches(7,7)
 
 RANG = 1e3
 
+TIME_LABEL = 'world time: {}'
+
 ax = plt.axes(xlim=(-RANG, RANG), ylim=(-RANG, RANG))
+time_text = ax.text(-RANG+100, -RANG+100, TIME_LABEL.format(0), fontsize=10)
 
 satGraph = plt.Circle((sat.x, sat.y), 8, fc='r')
 sunGraph = plt.Circle((0, 0), s.sun.r, fc='yellow', color='black')
@@ -372,7 +384,7 @@ def init():
 	satGraph.center = (sat.x, sat.y)
 	ax.add_patch(satGraph)
 	ax.add_patch(sunGraph)
-	return pgraphs + [sunGraph, satGraph]
+	return pgraphs + [sunGraph, satGraph, time_text]
 
 stopped = False
 def animate(i):
@@ -388,8 +400,9 @@ def animate(i):
 			pgraphs.append(pgraph)
 	
 		satGraph.center = (sat.x, sat.y)
+		time_text.set_text(TIME_LABEL.format((i+1)*float(DT)))
 
-	return pgraphs + [sunGraph, satGraph]
+	return pgraphs + [sunGraph, satGraph, time_text]
 
 
 def main(tmax):
@@ -397,7 +410,7 @@ def main(tmax):
 	anim = animation.FuncAnimation(fig, animate, 
 								   init_func=init, 
 								   frames=f, 
-								   interval=20,
+								   interval=30*DT,
 								   blit=True)
 
 	plt.show()
