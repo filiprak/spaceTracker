@@ -357,9 +357,11 @@ fig.set_size_inches(7,7)
 RANG = 1e3
 
 TIME_LABEL = 'world time: {}'
+DIST_LABEL = 'far: {}'
 
 ax = plt.axes(xlim=(-RANG, RANG), ylim=(-RANG, RANG))
-time_text = ax.text(-RANG+100, -RANG+100, TIME_LABEL.format(0), fontsize=10)
+time_text = ax.text(-RANG+100, -RANG+150, TIME_LABEL.format(0), fontsize=10)
+dist_text = ax.text(-RANG+100, -RANG+75, DIST_LABEL.format(0), fontsize=10)
 
 satGraph = plt.Circle((sat.x, sat.y), 8, fc='r')
 sunGraph = plt.Circle((0, 0), s.sun.r, fc='yellow', color='black')
@@ -384,7 +386,7 @@ def init():
 	satGraph.center = (sat.x, sat.y)
 	ax.add_patch(satGraph)
 	ax.add_patch(sunGraph)
-	return pgraphs + [sunGraph, satGraph, time_text]
+	return pgraphs + [sunGraph, satGraph, time_text, dist_text]
 
 stopped = False
 def animate(i):
@@ -401,8 +403,11 @@ def animate(i):
 	
 		satGraph.center = (sat.x, sat.y)
 		time_text.set_text(TIME_LABEL.format((i+1)*float(DT)))
+		
+		dist = sat.destplanet.distance(sat.x, sat.y)
+		dist_text.set_text(DIST_LABEL.format(float(dist)))
 
-	return pgraphs + [sunGraph, satGraph, time_text]
+	return pgraphs + [sunGraph, satGraph, time_text, dist_text]
 
 
 def main(tmax):
