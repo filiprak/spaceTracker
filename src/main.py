@@ -11,6 +11,8 @@ Main program module
 config_file = 'planets'
 
 show_every_step = False
+create_steps_graph = False
+steps_results_list = []
 
 import math
 import random
@@ -241,6 +243,8 @@ class SimulatedAnnealing():
 
 	def start(self):
 		self.read_configuration()
+		archieve_results = []
+		
 		x = (random.uniform(0, self.tmax), random.uniform(0, self.amax), random.uniform(0, self.vmax)) 
 		current_best_result = simulate(x, self.dt, self.tmax)
 		i = 0
@@ -251,7 +255,10 @@ class SimulatedAnnealing():
 				print "Steps and current result: "
 				print i
 				print new_result
-
+				
+			if create_steps_graph == True:
+				archieve_results.append(new_result)
+			
 			if new_result < current_best_result:
 				x = y
 				current_best_result = new_result
@@ -261,6 +268,9 @@ class SimulatedAnnealing():
 			if current_best_result <= self.minimal_result :
 				break
 			self.temperature *= self.freezing
+			
+		global steps_results_list
+		steps_results_list = archieve_results
 		return (current_best_result, i, x)
 
 	def read_configuration(self):
@@ -288,7 +298,7 @@ only_graph = False
 sat_state = None
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hvi:r:ag:",["ifile=","show_every_step"])
+	opts, args = getopt.getopt(sys.argv[1:],"hvi:r:ag:s",["ifile=","show_every_step"])
 except getopt.GetoptError:
 	print 'main.py -i <inputfile> -o <outputfile>'
 	sys.exit(2)
@@ -310,8 +320,15 @@ for opt, arg in opts:
 	elif opt == '-g':
 		only_graph = True
 		sat_state = tuple(map(float, arg.split(',')))
+	elif opt == '-s':
+		create_steps_graph = True
 		
 		
+# annealing algorithm runs
+from matplotlib import pyplot as plt
+
+# world plot sizes
+RANG = 1e3
 
 anneal = SimulatedAnnealing()
 best_score = sys.float_info.max
@@ -321,7 +338,7 @@ best_steps = 0
 if not only_graph:
 	for i in range(algorithm_runs):
 		(score, steps, result_state) = anneal.start()
-		if show_every_annealing == True :
+		if show_every_annealing == True:
 			print "Numer: " + str(i)
 			print "Wynik: " + str(score)
 			print "Ilosc krokow: " + str(steps)
@@ -330,12 +347,19 @@ if not only_graph:
 			best_score = score
 			best_state = result_state
 			best_steps = steps
+		
+		# save steps results plot
+		plt.clf()
+		plt.plot(range(len(steps_results_list)), steps_results_list, 'ro', markersize=1)
+		plt.axis([0, 1.1*anneal.steps, 0, 2*RANG])
+		plt.grid(True)
+		plt.savefig('run{}_{}_steps.png'.format(i, config_file),
+				bbox_inches='tight', dpi=300)
+		
 	print "Najlepszy wynik: " + str(best_score)
 	print "Ilosc krokow: " + str(best_steps)
 	print "Stan satelity: " + str(best_state)
 	
-	if show_chart == False :
-		sys.exit(0)
 else:
 	anneal.read_configuration()
 	best_state = sat_state
@@ -343,9 +367,10 @@ else:
 # animation
 import numpy as np
 import sys
-from matplotlib import pyplot as plt
 from matplotlib import animation
 
+if show_chart == False :
+	sys.exit(0)
 
 s, sat = createWorld( best_state )
 DT = anneal.dt
@@ -353,8 +378,6 @@ DT = anneal.dt
 fig = plt.figure()
 fig.set_dpi(100)
 fig.set_size_inches(7,7)
-
-RANG = 1e3
 
 TIME_LABEL = 'world time: {}'
 DIST_LABEL = 'far: {}'
