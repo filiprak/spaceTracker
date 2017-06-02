@@ -201,20 +201,19 @@ def simulate(startstate, dt, tmax):
 
 class SimulatedAnnealing():
 	def __init__(self):
-		self.state = (0, 0.3*math.pi, 300)
-		self.dt = 1
-		self.da = 0.01
-		self.dv = 1
+		self.state = None
+		self.dt = None
+		self.da = None
+		self.dv = None
 
-		self.dtime = 0.1
-		self.tmax = 500
-		self.vmax = 1000
-		self.amax = 2*math.pi
+		self.tmax = None
+		self.vmax = None
+		self.amax = None
 
-		self.steps = 1000
+		self.steps = None
 
-		self.temperature = 1000
-		self.freezing = 0.999
+		self.temperature = None
+		self.freezing = None
 
 	def neighbourhood(self, state):
 		result = []
@@ -243,11 +242,11 @@ class SimulatedAnnealing():
 	def start(self):
 		self.read_configuration()
 		x = (random.uniform(0, self.tmax), random.uniform(0, self.amax), random.uniform(0, self.vmax)) 
-		current_best_result = simulate(x, self.dtime, self.tmax)
+		current_best_result = simulate(x, self.dt, self.tmax)
 		i = 0
 		for  i in range(self.steps):
 			y = random.choice(self.neighbourhood(x))
-			new_result = simulate(y, self.dtime, self.tmax)
+			new_result = simulate(y, self.dt, self.tmax)
 			if show_every_step == True:
 				print "Steps and current result: "
 				print i
@@ -338,6 +337,7 @@ if not only_graph:
 	if show_chart == False :
 		sys.exit(0)
 else:
+	anneal.read_configuration()
 	best_state = sat_state
 
 # animation
