@@ -236,15 +236,19 @@ class SimulatedAnnealing():
 		return result
 
 	def probability(self, resx, resy):
-		if self.temperature == 0:
-			return 0
-		exponent = - math.fabs(resx-resy) / self.temperature
-		return math.exp(exponent)
+		if self.temperature < 0.001:
+			self.temperature= 0.0
+			return 0.0
+		diff = float(math.fabs(resx-resy)) * 100.0
+		if diff  < 0.1:
+			diff = 0.1
+		exponent = float( - diff / self.temperature )
+		return float(math.exp(exponent))
 
 	def start(self):
 		self.read_configuration()
 		archieve_results = []
-		
+
 		x = (random.uniform(0, self.tmax), random.uniform(0, self.amax), random.uniform(0, self.vmax)) 
 		current_best_result = simulate(x, self.dt, self.tmax)
 		i = 0
@@ -255,20 +259,18 @@ class SimulatedAnnealing():
 				print "Steps and current result: "
 				print i
 				print new_result
-				
-			if create_steps_graph == True:
-				archieve_results.append(new_result)
-			
 			if new_result < current_best_result:
 				x = y
 				current_best_result = new_result
-			elif random.uniform(0, 1) < self.probability(current_best_result, new_result):
+			elif float(random.uniform(0, 1))  < self.probability(current_best_result, new_result):
 				x = y
 				current_best_result = new_result
+			if create_steps_graph == True:
+				archieve_results.append(current_best_result)
 			if current_best_result <= self.minimal_result :
 				break
 			self.temperature *= self.freezing
-			
+
 		global steps_results_list
 		steps_results_list = archieve_results
 		return (current_best_result, i, x)
@@ -279,11 +281,11 @@ class SimulatedAnnealing():
 		self.dt = float(anneal_config[0])
 		self.da = float(anneal_config[1])
 		self.dv = float(anneal_config[2])
-		self.tmax = int(anneal_config[3])
+		self.tmax = float(anneal_config[3])
 		self.amax = float(anneal_config[4])
-		self.vmax = int(anneal_config[5])
+		self.vmax = float(anneal_config[5])
 		self.steps = int(anneal_config[6])
-		self.temperature = int(anneal_config[7])
+		self.temperature = float(anneal_config[7])
 		self.freezing = float(anneal_config[8])
 		self.minimal_result = float(anneal_config[9])
 
@@ -322,8 +324,8 @@ for opt, arg in opts:
 		sat_state = tuple(map(float, arg.split(',')))
 	elif opt == '-s':
 		create_steps_graph = True
-		
-		
+
+
 # annealing algorithm runs
 from matplotlib import pyplot as plt
 
